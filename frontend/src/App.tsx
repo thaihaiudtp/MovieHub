@@ -12,6 +12,9 @@ import History from "./pages/History";
 import Search from "./pages/Search";
 import Genres from "./pages/Genres";
 import NotFound from "./pages/NotFound";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import CastDetails from "./pages/CastDetails";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +33,9 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/genres" element={<Genres />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/cast/:id" element={<CastDetails />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

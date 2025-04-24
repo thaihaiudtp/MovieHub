@@ -1,16 +1,18 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, Play, Star, Clock, Plus, Share } from 'lucide-react';
+import { Heart, Play, Star, Plus, Share } from 'lucide-react';
 import MovieList from '@/components/movies/MovieList';
 import VideoPlayer from '@/components/videos/VideoPlayer';
 import { getMovieById } from '@/services/movieService';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import type { MovieDetails } from '@/types/movie';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<any>(null);
+  const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -119,7 +121,7 @@ const MovieDetails = () => {
             <div className="flex flex-wrap items-center gap-4 mb-6">
               <div className="flex items-center">
                 <Star className="h-5 w-5 text-yellow-500 mr-1" fill="currentColor" />
-                <span className="font-medium">{movie.voteAverage.toFixed(1)}</span>
+                <span className="font-medium">{movie?.voteAverage?.toFixed(1)}</span>
               </div>
               
               <span className="text-muted-foreground">
@@ -150,25 +152,33 @@ const MovieDetails = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Director</h3>
-                <p className="text-muted-foreground">{movie.director}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Cast</h3>
-                <div className="flex flex-wrap gap-2">
-                  {movie.cast?.map((actor: string, index: number) => (
-                    <span 
-                      key={index} 
-                      className="text-muted-foreground"
-                    >
-                      {actor}{index < movie.cast.length - 1 ? ',' : ''}
-                    </span>
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">Series Cast</h2>
+              <ScrollArea className="w-full">
+                <div className="flex gap-4 pb-4">
+                  {movie.cast?.slice(0, 5).map((actor, index) => (
+                    <Card key={index} className="flex-shrink-0 w-[200px] border-0 bg-secondary/20">
+                      <Link to={`/cast/${actor.id}`}>
+                        <CardContent className="p-0">
+                          <img 
+                            src={actor.image} 
+                            alt={actor.name}
+                            className="w-full h-[240px] object-cover object-top rounded-t-lg"
+                          />
+                          <div className="p-4">
+                            <h3 className="font-semibold text-lg">{actor.name}</h3>
+                            <p className="text-muted-foreground">{actor.role}</p>
+                            {actor.episodes && (
+                              <p className="text-sm text-muted-foreground mt-1">{actor.episodes}</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Link>
+                    </Card>
                   ))}
                 </div>
-              </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
-
 import { Movie } from '@/components/movies/MovieCard';
+import { CastMember } from '@/types/movie';
 
 export const genres = [
   'Action',
@@ -273,7 +273,36 @@ export const movieDetails = {
   ...featuredMovie,
   runtime: 169, // minutes
   director: 'Christopher Nolan',
-  cast: ['Matthew McConaughey', 'Anne Hathaway', 'Jessica Chastain', 'Michael Caine'],
+  cast: [
+    {
+      id: 'matthew-mcconaughey',
+      name: 'Matthew McConaughey',
+      role: 'Cooper',
+      image: 'https://source.unsplash.com/random/400x600?portrait,man',
+      episodes: undefined
+    },
+    {
+      id: 'anne-hathaway',
+      name: 'Anne Hathaway',
+      role: 'Dr. Amelia Brand',
+      image: 'https://source.unsplash.com/random/400x600?portrait,woman',
+      episodes: undefined
+    },
+    {
+      id: 'jessica-chastain',
+      name: 'Jessica Chastain',
+      role: 'Murphy',
+      image: 'https://source.unsplash.com/random/400x600?portrait,actress',
+      episodes: undefined
+    },
+    {
+      id: 'michael-caine',
+      name: 'Michael Caine',
+      role: 'Professor Brand',
+      image: 'https://source.unsplash.com/random/400x600?portrait,elderly',
+      episodes: undefined
+    }
+  ] as CastMember[],
   videoSrc: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
   fullOverview: 'In Earth\'s future, a global crop blight and second Dust Bowl are slowly rendering the planet uninhabitable. Professor Brand (Michael Caine), a brilliant NASA physicist, is working on plans to save mankind by transporting Earth\'s population to a new home via a wormhole. But first, Brand must send former NASA pilot Cooper (Matthew McConaughey) and a team of researchers through the wormhole and across the galaxy to find out which of three planets could be mankind\'s new home.',
   recommendations: trendingMovies.slice(0, 5),

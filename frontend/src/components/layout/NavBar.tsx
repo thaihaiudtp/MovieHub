@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -11,17 +10,30 @@ import {
   Film, 
   Heart, 
   Clock, 
-  User, 
-  LogIn
+  LogIn,
+  UserPlus,
+  LogOut,
+  User
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useToast } from '@/components/ui/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,9 +44,25 @@ const NavBar = () => {
       }
     };
 
+    // Check for user on mount
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+    navigate('/');
+  };
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -54,12 +82,10 @@ const NavBar = () => {
     >
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center">
             <span className="text-movie-primary font-bold text-2xl">Movie<span className="text-white dark:text-white">Hub</span></span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-sm font-medium hover:text-movie-primary transition-colors">
               Home
@@ -75,7 +101,6 @@ const NavBar = () => {
             </Link>
           </div>
 
-          {/* Desktop Right Controls */}
           <div className="hidden md:flex items-center space-x-4">
             {searchOpen ? (
               <form action="/search" method="get" className="relative">
@@ -102,17 +127,45 @@ const NavBar = () => {
                   <Search className="h-5 w-5" />
                 </Button>
                 <ThemeToggle />
-                <Button variant="ghost" size="sm">
-                  Sign In
-                </Button>
-                <Button size="sm">
-                  Sign Up
-                </Button>
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuItem className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>{user.name || user.email}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600 focus:text-red-600"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sign out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/signin')}>
+                      Sign In
+                    </Button>
+                    <Button size="sm" onClick={() => navigate('/signup')}>
+                      Sign Up
+                    </Button>
+                  </>
+                )}
               </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center space-x-3">
             <Button size="icon" variant="ghost" onClick={toggleSearch}>
               <Search className="h-5 w-5" />
@@ -124,7 +177,6 @@ const NavBar = () => {
           </div>
         </nav>
 
-        {/* Mobile Search */}
         {searchOpen && isMobile && (
           <div className="px-4 py-3 border-t border-border">
             <form action="/search" method="get" className="relative">
@@ -148,7 +200,6 @@ const NavBar = () => {
           </div>
         )}
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border animate-fade">
             <div className="flex flex-col space-y-3 py-4 px-4">
@@ -193,21 +244,47 @@ const NavBar = () => {
                 <span>Watch History</span>
               </Link>
               <div className="border-t border-border my-2"></div>
-              <Link 
-                to="/login" 
-                className="flex items-center space-x-2 p-2 rounded-md hover:bg-movie-hover-dark"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <LogIn className="h-5 w-5" /> 
-                <span>Sign In</span>
-              </Link>
-              <Link 
-                to="/register" 
-                className="flex items-center justify-center p-2 bg-movie-primary text-white rounded-md hover:bg-movie-primary/90"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>Sign Up</span>
-              </Link>
+              {user ? (
+                <>
+                  <div className="flex items-center space-x-2 p-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{user.name || user.email}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center justify-start space-x-2 w-full text-red-600 hover:text-red-600"
+                    onClick={() => {
+                      handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Sign Out</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/signin" 
+                    className="flex items-center space-x-2 p-2 rounded-md hover:bg-movie-hover-dark"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5" /> 
+                    <span>Sign In</span>
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="flex items-center justify-center p-2 bg-movie-primary text-white rounded-md hover:bg-movie-primary/90"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span>Sign Up</span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
